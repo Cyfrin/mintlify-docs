@@ -1,0 +1,135 @@
+---
+title: "Promoting to Production"
+description: "How to transition contracts from attack mode to production"
+---
+
+After successful stress testing, you can promote your contracts to production mode. This removes Safe Harbor protection and treats the contracts like mainnet deployments.
+
+## When to Promote
+
+Consider promoting when:
+
+- Contracts have been under attack for a meaningful period
+- No critical vulnerabilities have been found
+- You're confident in the security of your code
+- You're ready to deploy the same code to mainnet
+
+<Warning>
+Once promoted, there's no going back. Contracts in production mode cannot re-enter attack mode.
+</Warning>
+
+## The Promotion Process
+
+```
+UNDER_ATTACK → promote() → PROMOTION_REQUESTED → (3 days) → PRODUCTION
+```
+
+### Step 1: Request Promotion
+
+```solidity
+// Only the attack moderator can promote
+attackRegistry.promote(agreementAddress);
+```
+
+This sets the state to `PROMOTION_REQUESTED` and starts a 3-day countdown.
+
+### Step 2: Wait Period
+
+The 3-day delay serves as a final warning to whitehats. During this time:
+
+- Contracts are still attackable (Safe Harbor still applies)
+- Whitehats can make final attempts to find issues
+- You can cancel the promotion if issues are found
+
+### Step 3: Automatic Transition
+
+After 3 days, the state automatically transitions to `PRODUCTION` the next time the state is queried.
+
+## Canceling Promotion
+
+If an issue is discovered during the 3-day wait:
+
+```solidity
+// Cancel and return to UNDER_ATTACK state
+attackRegistry.cancelPromotion(agreementAddress);
+```
+
+## Checking Promotion Status
+
+```solidity
+IAttackRegistry.AgreementInfo memory info = attackRegistry.getAgreementInfo(agreementAddress);
+
+// Check if promotion was requested
+if (info.promotionRequestedTimestamp > 0) {
+    // Calculate when promotion completes
+    uint256 promotionTime = info.promotionRequestedTimestamp + 3 days;
+
+    if (block.timestamp >= promotionTime) {
+        // Contract is now in PRODUCTION
+    } else {
+        // Still in PROMOTION_REQUESTED, can be canceled
+    }
+}
+```
+
+## Attack Moderator Role
+
+The **attack moderator** controls promotion decisions. By default, this is the agreement owner, but it can be transferred:
+
+```solidity
+// Transfer moderation rights
+attackRegistry.transferAttackModerator(agreementAddress, newModerator);
+```
+
+The attack moderator can:
+- Call `promote()` to request production
+- Call `cancelPromotion()` to abort promotion
+- Call `markCorrupted()` if an attack succeeds
+- Transfer the moderator role
+
+## Marking as Corrupted
+
+If a whitehat successfully exploits your contracts, you should mark them as corrupted:
+
+```solidity
+// Mark the agreement as corrupted
+attackRegistry.markCorrupted(agreementAddress);
+```
+
+This:
+- Sets the state to `CORRUPTED` (terminal)
+- Signals to users that the contracts are compromised
+- Prevents accidental promotion of vulnerable contracts
+
+## After Promotion
+
+Once in production mode:
+
+1. **Deploy to mainnet**: Your BattleChain contracts are battle-tested and ready
+2. **Keep monitoring**: Continue to monitor your BattleChain deployment
+3. **Mirror updates**: Keep BattleChain and mainnet in sync
+4. **Use for staging**: Future updates can use BattleChain's attack mode
+
+<Note>
+Your BattleChain contracts should remain as a production mirror of your mainnet contracts. This allows you to use BattleChain for testing updates before mainnet.
+</Note>
+
+## DAO Instant Promotion
+
+The DAO can instantly promote contracts in emergency situations:
+
+```solidity
+// DAO only - bypasses the 3-day delay
+attackRegistry.instantPromote(agreementAddress);
+```
+
+This happens when:
+- A copycat contract appears on mainnet
+- TVL grows unexpectedly large
+- Other emergency situations
+
+You cannot prevent instant promotion, but you'll see the `AgreementStateChanged` event.
+
+<Card title="Next: Best Practices" icon="arrow-right" href="/protocols/best-practices">
+  Learn best practices for using BattleChain
+</Card>

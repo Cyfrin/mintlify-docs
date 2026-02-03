@@ -1,0 +1,157 @@
+---
+title: "Requesting Attack Mode"
+description: "How to submit your contracts for attack mode approval"
+---
+
+Once your contracts are deployed and your Safe Harbor agreement is created, you can request attack mode through the `AttackRegistry`.
+
+## Prerequisites
+
+Before requesting attack mode, ensure:
+
+<Steps>
+  <Step title="Contracts Deployed">
+    All contracts in your agreement's scope are deployed via `BattleChainDeployer`
+  </Step>
+  <Step title="Agreement Created">
+    Your Safe Harbor agreement is created via `AgreementFactory`
+  </Step>
+  <Step title="Agreement Adopted">
+    You've called `adoptSafeHarbor()` to link your protocol to the agreement
+  </Step>
+  <Step title="Authorization Set">
+    The agreement owner is authorized for all contracts (automatically true if deployer = owner)
+  </Step>
+  <Step title="Commitment Window">
+    Agreement's commitment window extends at least 7 days from now
+  </Step>
+</Steps>
+
+## Requesting Attack Mode
+
+```solidity
+// Request attack mode for all contracts in your agreement
+attackRegistry.requestUnderAttack(agreementAddress);
+```
+
+This function:
+1. Validates the agreement was created by the official `AgreementFactory`
+2. Verifies you're the agreement owner
+3. Checks all contracts in scope were deployed via `BattleChainDeployer`
+4. Confirms the authorization chain is correct
+5. Validates the commitment window meets minimum requirements
+6. Sets the agreement state to `ATTACK_REQUESTED`
+
+## What Happens Next
+
+After calling `requestUnderAttack()`:
+
+```
+ATTACK_REQUESTED → (DAO reviews) → UNDER_ATTACK or REJECTED
+```
+
+The DAO will review your request, checking:
+
+- Is this a legitimate new deployment (not a mainnet copycat)?
+- Is the liquidity appropriate for the contract type?
+- Are the bounty terms reasonable?
+- Is the scope clearly defined?
+
+### Approval Timelines
+
+| Outcome | Timeline |
+|---------|----------|
+| DAO Approves | Immediate transition to `UNDER_ATTACK` |
+| DAO Rejects | Contracts return to `NOT_DEPLOYED` state |
+| DAO Takes No Action | Auto-promotes to `PRODUCTION` after 14 days |
+
+<Note>
+The 14-day auto-promotion is a safety mechanism. If the DAO doesn't act, contracts become production (protected) rather than remaining attackable indefinitely.
+</Note>
+
+## For Non-BattleChainDeployer Contracts
+
+If your contracts weren't deployed via `BattleChainDeployer`, use:
+
+```solidity
+// Request attack mode for externally deployed contracts
+attackRegistry.requestUnderAttackByNonAuthorized(agreementAddress);
+```
+
+<Warning>
+This path requires extra DAO scrutiny since there's no on-chain proof of legitimate deployment. Expect longer review times.
+</Warning>
+
+## Skipping Attack Mode
+
+If you don't want the attack phase (e.g., deploying a known-safe contract), you can go directly to production:
+
+```solidity
+// Skip attack mode entirely
+attackRegistry.goToProduction(agreementAddress);
+```
+
+This:
+- Requires contracts be deployed via `BattleChainDeployer`
+- Immediately sets state to `PRODUCTION`
+- No DAO approval needed
+- No Safe Harbor protection ever applies
+
+## Checking Request Status
+
+Monitor your request status:
+
+```solidity
+// Get current state
+IAttackRegistry.ContractState state = attackRegistry.getAgreementState(agreementAddress);
+
+// ContractState.ATTACK_REQUESTED (2) = waiting for DAO
+// ContractState.UNDER_ATTACK (3) = approved, attacks allowed
+// ContractState.NOT_DEPLOYED (0) = rejected (or never requested)
+
+// Get full details
+IAttackRegistry.AgreementInfo memory info = attackRegistry.getAgreementInfo(agreementAddress);
+
+// Check deadline for auto-promotion
+uint256 deadline = info.deadlineTimestamp;
+```
+
+## Events to Monitor
+
+```solidity
+// Emitted when state changes
+event AgreementStateChanged(address indexed agreementAddress, ContractState newState);
+
+// Watch for:
+// - newState = ATTACK_REQUESTED (your request was submitted)
+// - newState = UNDER_ATTACK (approved!)
+// - newState = NOT_DEPLOYED (rejected)
+```
+
+## Common Issues
+
+<AccordionGroup>
+  <Accordion title="AttackRegistry__InvalidAgreement">
+    The agreement wasn't created by the official `AgreementFactory`. Create a new agreement using the factory.
+  </Accordion>
+
+  <Accordion title="AttackRegistry__NotAgreementOwner">
+    You're not the owner of the agreement. Only the agreement owner can request attack mode.
+  </Accordion>
+
+  <Accordion title="AttackRegistry__AgreementOwnerNotAuthorized">
+    The agreement owner isn't authorized for one or more contracts. The deployer needs to call `authorizeAgreementOwner()` for each contract.
+  </Accordion>
+
+  <Accordion title="AttackRegistry__InsufficientCommitment">
+    The agreement's commitment window is too short. Call `agreement.extendCommitmentWindow()` to extend it to at least 7 days from now.
+  </Accordion>
+
+  <Accordion title="AttackRegistry__EmptyContractArray">
+    No contracts in the agreement's BattleChain scope. Add accounts to your agreement for the BattleChain chain ID.
+  </Accordion>
+</AccordionGroup>
+
+<Card title="Next: Promoting to Production" icon="arrow-right" href="/protocols/promotion">
+  Learn how to promote your contracts after stress testing
+</Card>

@@ -1,0 +1,152 @@
+---
+title: "Finding Attackable Contracts"
+description: "How to query the AttackRegistry for contracts you can attack"
+---
+
+The `AttackRegistry` tracks which contracts are currently in attack mode. Learn how to find and verify attackable targets.
+
+## Checking Individual Contracts
+
+The simplest way to check if a contract is attackable:
+
+```solidity
+// Returns true if the contract is in UNDER_ATTACK or PROMOTION_REQUESTED state
+bool attackable = attackRegistry.isTopLevelContractUnderAttack(contractAddress);
+```
+
+<Note>
+Contracts in `PROMOTION_REQUESTED` state are still attackable during the 3-day promotion delay.
+</Note>
+
+## Getting Agreement Details
+
+Once you've found an attackable contract, get its agreement:
+
+```solidity
+// Get the agreement address for this contract
+address agreementAddress = attackRegistry.getAgreementForContract(contractAddress);
+
+// Get the full agreement details
+IAgreement agreement = IAgreement(agreementAddress);
+AgreementDetails memory details = agreement.getDetails();
+```
+
+## Finding All Attackable Contracts
+
+There's no on-chain function to list all attackable contracts. Instead, monitor events:
+
+```solidity
+// Watch for state changes
+event AgreementStateChanged(address indexed agreementAddress, ContractState newState);
+
+// newState = 3 means UNDER_ATTACK (attackable)
+// newState = 4 means PROMOTION_REQUESTED (still attackable)
+```
+
+### Indexing Strategy
+
+Build your own index by:
+
+1. Listening to `AgreementStateChanged` events
+2. Tracking agreements that enter `UNDER_ATTACK` state
+3. Removing them when they reach `PRODUCTION` or `CORRUPTED`
+
+```solidity
+// Pseudocode for tracking
+if (newState == ContractState.UNDER_ATTACK || newState == ContractState.PROMOTION_REQUESTED) {
+    // Get contracts in this agreement's scope
+    address[] memory contracts = IAgreement(agreementAddress).getBattleChainScopeAddresses();
+    // Add to your attackable list
+    for (uint i = 0; i < contracts.length; i++) {
+        attackableContracts.add(contracts[i]);
+    }
+}
+
+if (newState == ContractState.PRODUCTION || newState == ContractState.CORRUPTED) {
+    // Remove from your attackable list
+    address[] memory contracts = IAgreement(agreementAddress).getBattleChainScopeAddresses();
+    for (uint i = 0; i < contracts.length; i++) {
+        attackableContracts.remove(contracts[i]);
+    }
+}
+```
+
+## Verifying Agreement Legitimacy
+
+Before attacking, verify the agreement is legitimate:
+
+```solidity
+// Check the agreement was created by the official factory
+bool isValid = safeHarborRegistry.isAgreementValid(agreementAddress);
+
+// Verify the agreement state directly
+IAttackRegistry.ContractState state = attackRegistry.getAgreementState(agreementAddress);
+require(state == ContractState.UNDER_ATTACK || state == ContractState.PROMOTION_REQUESTED);
+```
+
+## Understanding Scope
+
+Each agreement defines which contracts are in scope:
+
+```solidity
+// Get all BattleChain scope addresses
+address[] memory scopeAddresses = agreement.getBattleChainScopeAddresses();
+
+// Check if a specific contract is in scope
+bool inScope = agreement.isContractInScope(targetContract);
+
+// Get detailed scope information
+Chain[] memory chains = agreement.getChainScope();
+// Look for the BattleChain chain (e.g., "eip155:325")
+```
+
+### Child Contract Scope
+
+Agreements can include child contracts created by the main contracts:
+
+| Scope | Meaning |
+|-------|---------|
+| `None` | Only explicitly listed contracts |
+| `ExistingOnly` | Listed contracts + children that existed when agreement was created |
+| `All` | Listed contracts + all children (past and future) |
+| `FutureOnly` | Listed contracts + children created after agreement |
+
+```solidity
+// Check the child contract scope for a specific account
+Account[] memory accounts = agreement.getChainAccounts("eip155:325");
+for (uint i = 0; i < accounts.length; i++) {
+    // accounts[i].childContractScope tells you which children are in scope
+}
+```
+
+## Red Flags to Watch For
+
+<Warning>
+Be cautious of:
+
+- **Suspiciously high bounties**: May indicate a scam or honeypot
+- **Very new agreements**: Less time for community vetting
+- **Missing contact details**: Legitimate protocols have security contacts
+- **Mainnet mirrors**: Contracts identical to existing mainnet contracts
+</Warning>
+
+## Useful Queries
+
+```solidity
+// Get agreement info including deadlines
+IAttackRegistry.AgreementInfo memory info = attackRegistry.getAgreementInfo(agreementAddress);
+
+// Check when promotion was requested (if in PROMOTION_REQUESTED)
+uint256 promotionTime = info.promotionRequestedTimestamp;
+uint256 productionAt = promotionTime + 3 days;  // When it becomes production
+
+// Get the protocol name
+string memory protocolName = agreement.getProtocolName();
+
+// Get contact details
+Contact[] memory contacts = agreement.getContactDetails();
+```
+
+<Card title="Next: Executing Attacks" icon="arrow-right" href="/whitehats/executing-attacks">
+  Learn how to properly execute attacks
+</Card>

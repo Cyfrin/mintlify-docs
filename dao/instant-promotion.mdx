@@ -1,0 +1,176 @@
+---
+title: "Instant Promotion"
+description: "When and how to use emergency instant promotion"
+---
+
+The DAO has the power to instantly promote contracts to production mode, bypassing the normal 3-day delay. This is an emergency power that should be used sparingly.
+
+## When to Use Instant Promotion
+
+<Warning>
+Instant promotion is an emergency measure. Use it only when there's a genuine threat to the ecosystem.
+</Warning>
+
+### Copycat Discovery
+
+**Most common scenario**: A mainnet contract is discovered that mirrors an attackable BattleChain contract.
+
+```
+Scenario:
+1. Protocol deploys "MyVault" to BattleChain, enters attack mode
+2. Whitehat finds vulnerability in MyVault
+3. Someone deploys identical MyVault to Ethereum mainnet
+4. Mainnet MyVault is now vulnerable to the same exploit
+```
+
+**Action**: Instantly promote BattleChain MyVault to production to stop further vulnerability disclosure.
+
+### TVL Surge
+
+If TVL in an attackable contract grows unexpectedly large:
+
+```
+Scenario:
+1. Protocol deploys with $100K TVL
+2. TVL grows to $10M due to popularity
+3. Risk/reward for whitehats changes dramatically
+```
+
+**Action**: Consider instant promotion if the protocol requests it or risk becomes unreasonable.
+
+### Protocol Emergency
+
+If the protocol discovers a critical issue and needs to exit attack mode immediately:
+
+```
+Scenario:
+1. Protocol is in attack mode
+2. Protocol discovers a vulnerability themselves
+3. Protocol needs to patch and doesn't want whitehats exploiting it
+```
+
+**Action**: Instant promote so the protocol can address the issue safely.
+
+## How to Instant Promote
+
+```solidity
+// The DAO calls this function
+attackRegistry.instantPromote(agreementAddress);
+```
+
+### Valid States for Instant Promotion
+
+You can instant promote from:
+
+| Current State | Result |
+|--------------|--------|
+| `ATTACK_REQUESTED` | Skips attack phase entirely → `PRODUCTION` |
+| `UNDER_ATTACK` | Ends attack phase immediately → `PRODUCTION` |
+| `PROMOTION_REQUESTED` | Bypasses 3-day delay → `PRODUCTION` |
+
+### Effects
+
+When you call `instantPromote()`:
+
+1. Agreement state immediately becomes `PRODUCTION`
+2. Safe Harbor protection ends
+3. Contracts are no longer attackable
+4. Event emitted: `AgreementStateChanged(agreementAddress, PRODUCTION)`
+
+## Process for Instant Promotion
+
+<Steps>
+  <Step title="Identify Emergency">
+    Determine that an emergency situation exists (copycat, TVL surge, etc.)
+  </Step>
+  <Step title="Verify Legitimacy">
+    Confirm the emergency is real, not a false alarm
+  </Step>
+  <Step title="Document Rationale">
+    Record why instant promotion is necessary
+  </Step>
+  <Step title="Execute Promotion">
+    Call `instantPromote()` on the agreement
+  </Step>
+  <Step title="Notify Stakeholders">
+    Inform the protocol and community about the action
+  </Step>
+</Steps>
+
+## Detecting Copycat Situations
+
+### Monitoring Strategies
+
+1. **Bytecode Monitoring**: Watch for deployments on mainnet that match BattleChain contracts
+2. **Protocol Names**: Alert on similar protocol names appearing on other chains
+3. **Social Monitoring**: Watch for discussions about exploits being deployed elsewhere
+
+### Automated Detection
+
+Consider implementing automated checks:
+
+```solidity
+// Pseudocode for copycat detection
+function checkForCopycat(address battleChainContract) external view returns (bool) {
+    bytes32 bytecodeHash = keccak256(battleChainContract.code);
+
+    // Check if same bytecode exists on monitored chains
+    for (uint i = 0; i < monitoredChains.length; i++) {
+        if (existsOnChain(bytecodeHash, monitoredChains[i])) {
+            return true;  // Copycat detected!
+        }
+    }
+    return false;
+}
+```
+
+## Communication Template
+
+When executing instant promotion, communicate clearly:
+
+```
+EMERGENCY INSTANT PROMOTION EXECUTED
+
+Agreement: 0x1234...
+Protocol: MyProtocol
+Previous State: UNDER_ATTACK
+New State: PRODUCTION
+
+Reason: Copycat contract detected on Ethereum mainnet at 0xABCD...
+The mainnet deployment contains identical bytecode and is vulnerable to
+the same exploits being tested on BattleChain.
+
+To protect mainnet users, we have instantly promoted this agreement to
+production, ending the attack mode period.
+
+Actions taken:
+- Instant promotion executed at block 12345678
+- Protocol notified via security@myprotocol.com
+- Mainnet vulnerability disclosed to protocol team
+
+DAO Signers: [list of signers if multisig]
+```
+
+## After Instant Promotion
+
+### For the Protocol
+
+1. The protocol's contracts are now in production mode
+2. They should assess whether to continue on BattleChain
+3. If there was a copycat, they need to address the mainnet vulnerability
+
+### For Whitehats
+
+1. Safe Harbor protection no longer applies
+2. Any ongoing attacks should stop immediately
+3. Standard bug bounty rules apply going forward
+
+### For the DAO
+
+1. Document the decision and rationale
+2. Review if process improvements are needed
+3. Consider if the situation was preventable
+
+<Card title="Next: Governance Parameters" icon="arrow-right" href="/dao/parameters">
+  Learn about governance-controlled parameters
+</Card>

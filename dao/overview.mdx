@@ -1,0 +1,112 @@
+---
+title: "Overview"
+description: "The DAO's role as registry moderator"
+---
+
+The BattleChain DAO serves as the registry moderator, responsible for approving attack requests, preventing abuse, and maintaining the integrity of the ecosystem.
+
+## The DAO's Role
+
+The DAO acts as the **registry moderator** for the `AttackRegistry`. This role has significant responsibilities:
+
+<CardGroup cols={2}>
+  <Card title="Approve Attack Requests" icon="check-circle">
+    Review and approve legitimate protocols requesting attack mode
+  </Card>
+  <Card title="Reject Copycats" icon="ban">
+    Prevent mainnet mirrors from entering attack mode
+  </Card>
+  <Card title="Emergency Promotion" icon="bolt">
+    Instantly promote contracts when necessary
+  </Card>
+  <Card title="Set Parameters" icon="sliders">
+    Govern chain validity and other parameters
+  </Card>
+</CardGroup>
+
+## Why DAO Moderation?
+
+### Preventing Copycat Attacks
+
+Without moderation, malicious actors could:
+1. Deploy a contract identical to a mainnet protocol
+2. Enter attack mode
+3. Have whitehats find vulnerabilities
+4. Use those vulnerabilities to attack mainnet
+
+The DAO reviews requests to ensure contracts are genuinely new, not copies of existing mainnet protocols.
+
+### Protecting the Ecosystem
+
+The DAO ensures:
+- Only legitimate protocols use BattleChain
+- Attack mode isn't abused for malicious purposes
+- The Safe Harbor system maintains credibility
+
+## Registry Moderator Powers
+
+The registry moderator (DAO) can:
+
+```solidity
+// Approve an attack request
+function approveAttack(address agreementAddress) external;
+
+// Reject an attack request
+function rejectAttackRequest(address agreementAddress) external;
+
+// Instantly promote to production (emergency)
+function instantPromote(address agreementAddress) external;
+```
+
+Additionally, the DAO (through governance) controls:
+
+```solidity
+// Set which chains are valid for agreements
+function setValidChains(string[] calldata caip2ChainIds) external;
+
+// Mark chains as invalid
+function setInvalidChains(string[] calldata caip2ChainIds) external;
+```
+
+## DAO Workflow
+
+<Steps>
+  <Step title="Monitor Events">
+    Watch for `AgreementStateChanged` events with `ATTACK_REQUESTED` state
+  </Step>
+  <Step title="Review Request">
+    Verify the protocol is legitimate and not a mainnet copycat
+  </Step>
+  <Step title="Approve or Reject">
+    Call `approveAttack()` or `rejectAttackRequest()` based on review
+  </Step>
+  <Step title="Monitor for Issues">
+    Watch for copycat situations requiring emergency action
+  </Step>
+</Steps>
+
+## Timeline Constraints
+
+| Scenario | Timeline |
+|----------|----------|
+| DAO reviews and approves | Request → `UNDER_ATTACK` immediately |
+| DAO reviews and rejects | Request → `NOT_DEPLOYED` immediately |
+| DAO takes no action | Request → `PRODUCTION` after 14 days |
+
+<Note>
+The 14-day auto-promotion is a safety mechanism. If the DAO is inactive, contracts default to production (protected) rather than remaining attackable indefinitely.
+</Note>
+
+## Getting Started
+
+<CardGroup cols={3}>
+  <Card title="Review Requests" icon="magnifying-glass" href="/dao/reviewing-requests">
+    How to evaluate attack mode requests
+  </Card>
+  <Card title="Approval Process" icon="check" href="/dao/approval-process">
+    Approving and rejecting requests
+  </Card>
+  <Card title="Instant Promotion" icon="bolt" href="/dao/instant-promotion">
+    Emergency promotion procedures
+  </Card>
+</CardGroup>

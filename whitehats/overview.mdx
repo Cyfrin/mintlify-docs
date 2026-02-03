@@ -1,0 +1,102 @@
+---
+title: "Overview"
+description: "What whitehats can do on BattleChain"
+---
+
+BattleChain provides whitehats with a unique opportunity to legally attack smart contracts and earn bounties. All contracts in "attack mode" are covered by Safe Harbor agreements that protect you from legal liability.
+
+## Why BattleChain?
+
+### Legal Protection
+
+Unlike traditional bug bounties where you report vulnerabilities, BattleChain lets you actually exploit them. The Safe Harbor agreement provides legal protection for:
+
+- Executing exploits on contracts in attack mode
+- Extracting funds from vulnerable contracts
+- Keeping a bounty percentage of recovered funds
+
+### Real Rewards
+
+Contracts on BattleChain have real funds. Successful exploits earn you real bounties, not just reputation points.
+
+### Clear Rules
+
+Each contract has a published Safe Harbor agreement defining:
+- Bounty percentage and caps
+- Asset recovery address
+- Identity requirements
+- Contracts in scope
+
+## The Whitehat Journey
+
+<Steps>
+  <Step title="Find Targets">
+    Query the `AttackRegistry` for contracts in `UNDER_ATTACK` state
+  </Step>
+  <Step title="Review Terms">
+    Check the Safe Harbor agreement for bounty terms and scope
+  </Step>
+  <Step title="Execute Attack">
+    Exploit vulnerabilities in contracts within scope
+  </Step>
+  <Step title="Handle Funds">
+    Send recovered funds to the asset recovery address, keeping your bounty
+  </Step>
+  <Step title="Comply with Requirements">
+    Meet any identity requirements specified in the agreement
+  </Step>
+</Steps>
+
+## What's Protected
+
+<CardGroup cols={2}>
+  <Card title="Protected Actions" icon="shield-check">
+    - Exploiting contracts in `UNDER_ATTACK` state
+    - Extracting funds from vulnerable contracts
+    - Keeping bounty up to the specified cap
+    - Acting without prior coordination
+  </Card>
+  <Card title="Not Protected" icon="shield-xmark">
+    - Attacking contracts in `PRODUCTION` state
+    - Attacking contracts outside the agreement's scope
+    - Keeping more than your bounty entitlement
+    - Ignoring identity requirements
+  </Card>
+</CardGroup>
+
+## Quick Check
+
+Before attacking any contract:
+
+```solidity
+// 1. Check if the contract is attackable
+bool isAttackable = attackRegistry.isTopLevelContractUnderAttack(targetContract);
+
+// 2. Get the agreement address
+address agreement = attackRegistry.getAgreementForContract(targetContract);
+
+// 3. Check bounty terms
+BountyTerms memory terms = IAgreement(agreement).getBountyTerms();
+
+// 4. Verify contract is in scope
+bool inScope = IAgreement(agreement).isContractInScope(targetContract);
+```
+
+## Important Considerations
+
+<Warning>
+**Due Diligence Required**
+
+Before exploiting a vulnerability, verify that:
+- The same vulnerability doesn't exist on mainnet
+- You're not exposing a zero-day that could harm other protocols
+- The contract is genuinely in attack mode (not a scam)
+</Warning>
+
+<Note>
+If you discover a vulnerability that also exists on mainnet, consider using a traditional bug bounty platform instead. Publicly exploiting it on BattleChain could tip off malicious actors.
+</Note>
+
+<Card title="Next: Finding Targets" icon="arrow-right" href="/whitehats/finding-targets">
+  Learn how to find attackable contracts
+</Card>

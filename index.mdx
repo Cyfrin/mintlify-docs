@@ -1,97 +1,50 @@
 ---
-title: "Introduction"
-description: "Welcome to the new home for your documentation"
+title: "Welcome to BattleChain"
+description: "The pre-mainnet stress testing environment for smart contracts"
 ---
 
-## Setting up
+BattleChain is an incentivized pre-mainnet environment where protocols can stress test their smart contracts with real funds before deploying to production.
 
-Get your documentation site up and running in minutes.
+## The Problem
 
-<Card
-  title="Start here"
-  icon="rocket"
-  href="/quickstart"
-  horizontal
->
-  Follow our three step quickstart guide.
-</Card>
+- There's no real staging environment in Web3
+- Projects go from $0 to $5M TVL overnight after audit
+- Bug bounties are difficult for ethical hackers
+- The industry keeps losing billions to preventable exploits
 
-## Make it yours
+## The Solution
 
-Design a docs site that looks great and empowers your users.
+BattleChain provides a controlled environment where:
 
-<Columns cols={2}>
-  <Card
-    title="Edit locally"
-    icon="pen-to-square"
-    href="/development"
-  >
-    Edit your docs locally and preview them in real time.
+- **Protocols** deploy audited contracts with real liquidity for stress testing
+- **Whitehats** legally attack contracts marked as "attackable" and earn bounties
+- **The DAO** moderates the process, approving attack requests and preventing copycat exploits
+
+<CardGroup cols={3}>
+  <Card title="For Protocols" icon="building" href="/protocols/overview">
+    Deploy and stress test your contracts before mainnet
   </Card>
-  <Card
-    title="Customize your site"
-    icon="palette"
-    href="/essentials/settings"
-  >
-    Customize the design and colors of your site to match your brand.
+  <Card title="For Whitehats" icon="user-secret" href="/whitehats/overview">
+    Find vulnerabilities and earn bounties legally
   </Card>
-    <Card
-    title="Set up navigation"
-    icon="map"
-    href="/essentials/navigation"
-  >
-    Organize your docs to help users find what they need and succeed with your product.
+  <Card title="For the DAO" icon="landmark" href="/dao/overview">
+    Moderate the attack registry and protect the ecosystem
   </Card>
-  <Card
-    title="API documentation"
-    icon="terminal"
-    href="/api-reference/introduction"
-  >
-    Auto-generate API documentation from OpenAPI specifications.
-  </Card>
-</Columns>
+</CardGroup>
 
-## Create beautiful pages
+## How It Works
 
-Everything you need to create world-class documentation.
+```
+Deploy → Request Attack Mode → DAO Approves → Stress Test → Promote to Production
+```
 
-<Columns cols={2}>
-  <Card
-    title="Write with MDX"
-    icon="pen-fancy"
-    href="/essentials/markdown"
-  >
-    Use MDX to style your docs pages.
-  </Card>
-  <Card
-    title="Code samples"
-    icon="code"
-    href="/essentials/code"
-  >
-    Add sample code to demonstrate how to use your product.
-  </Card>
-  <Card
-    title="Images"
-    icon="image"
-    href="/essentials/images"
-  >
-    Display images and other media.
-  </Card>
-  <Card
-    title="Reusable snippets"
-    icon="recycle"
-    href="/essentials/reusable-snippets"
-  >
-    Write once and reuse across your docs.
-  </Card>
-</Columns>
+1. Protocol deploys contracts via `BattleChainDeployer`
+2. Protocol creates a Safe Harbor agreement defining bounty terms
+3. Protocol requests attack mode via `AttackRegistry`
+4. DAO reviews and approves the request
+5. Whitehats attack the contracts legally
+6. Protocol promotes to production when confident
 
-## Need inspiration?
-
-<Card
-  title="See complete examples"
-  icon="stars"
-  href="https://mintlify.com/customers"
->
-  Browse our showcase of exceptional documentation sites.
+<Card title="Understand Contract States" icon="diagram-project" href="/contract-states">
+  Learn about the contract state machine that powers BattleChain
 </Card>

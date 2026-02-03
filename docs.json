@@ -1,68 +1,85 @@
 {
   "$schema": "https://mintlify.com/docs.json",
-  "theme": "mint",
-  "name": "Mint Starter Kit",
+  "theme": "palm",
+  "name": "BattleChain",
   "colors": {
-    "primary": "#16A34A",
-    "light": "#07C983",
-    "dark": "#15803D"
+    "primary": "#3B82F6",
+    "light": "#60A5FA",
+    "dark": "#2563EB"
+  },
+  "appearance": {
+    "default": "dark"
   },
   "favicon": "/favicon.svg",
   "navigation": {
     "tabs": [
       {
-        "tab": "Guides",
+        "tab": "Getting Started",
         "groups": [
           {
-            "group": "Getting started",
+            "group": "Introduction",
             "pages": [
               "index",
-              "quickstart",
-              "development"
-            ]
-          },
-          {
-            "group": "Customization",
-            "pages": [
-              "essentials/settings",
-              "essentials/navigation"
-            ]
-          },
-          {
-            "group": "Writing content",
-            "pages": [
-              "essentials/markdown",
-              "essentials/code",
-              "essentials/images",
-              "essentials/reusable-snippets"
-            ]
-          },
-          {
-            "group": "AI tools",
-            "pages": [
-              "ai-tools/cursor",
-              "ai-tools/claude-code",
-              "ai-tools/windsurf"
+              "what-is-battlechain",
+              "contract-states"
             ]
           }
         ]
       },
       {
-        "tab": "API reference",
+        "tab": "For Protocols",
         "groups": [
           {
-            "group": "API documentation",
+            "group": "Protocol Guide",
             "pages": [
-              "api-reference/introduction"
+              "protocols/overview",
+              "protocols/deploying",
+              "protocols/agreements",
+              "protocols/attack-mode",
+              "protocols/promotion",
+              "protocols/best-practices"
             ]
-          },
+          }
+        ]
+      },
+      {
+        "tab": "For Whitehats",
+        "groups": [
           {
-            "group": "Endpoint examples",
+            "group": "Whitehat Guide",
             "pages": [
-              "api-reference/endpoint/get",
-              "api-reference/endpoint/create",
-              "api-reference/endpoint/delete",
-              "api-reference/endpoint/webhook"
+              "whitehats/overview",
+              "whitehats/finding-targets",
+              "whitehats/executing-attacks",
+              "whitehats/bounties",
+              "whitehats/safe-harbor",
+              "whitehats/identity"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "For the DAO",
+        "groups": [
+          {
+            "group": "DAO Guide",
+            "pages": [
+              "dao/overview",
+              "dao/reviewing-requests",
+              "dao/approval-process",
+              "dao/instant-promotion",
+              "dao/parameters"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "API Reference",
+        "groups": [
+          {
+            "group": "Contracts",
+            "pages": [
+              "contracts/reference"
             ]
           }
         ]
@@ -71,14 +88,9 @@
     "global": {
       "anchors": [
         {
-          "anchor": "Documentation",
-          "href": "https://mintlify.com/docs",
-          "icon": "book-open-cover"
-        },
-        {
-          "anchor": "Blog",
-          "href": "https://mintlify.com/blog",
-          "icon": "newspaper"
+          "anchor": "GitHub",
+          "href": "https://github.com/battlechain",
+          "icon": "github"
         }
       ]
     }
@@ -91,32 +103,30 @@
     "links": [
       {
         "label": "Support",
-        "href": "mailto:hi@mintlify.com"
+        "href": "mailto:support@battlechain.com"
       }
     ],
     "primary": {
       "type": "button",
-      "label": "Dashboard",
-      "href": "https://dashboard.mintlify.com"
+      "label": "Launch App",
+      "href": "https://app.battlechain.com"
     }
-  },
-  "contextual": {
-    "options": [
-     "copy",
-     "view",
-     "chatgpt",
-     "claude",
-     "perplexity",
-     "mcp",
-     "cursor",
-     "vscode"
-   ]
   },
   "footer": {
     "socials": {
-      "x": "https://x.com/mintlify",
-      "github": "https://github.com/mintlify",
-      "linkedin": "https://linkedin.com/company/mintlify"
+      "x": "https://x.com/battlechain",
+      "github": "https://github.com/battlechain",
+      "discord": "https://discord.gg/battlechain"
+    }
+  },
+  "font": {
+    "headings": {
+      "family": "Inter",
+      "weight": 600
+    },
+    "body": {
+      "family": "Inter",
+      "weight": 400
     }
   }
 }

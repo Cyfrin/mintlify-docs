@@ -1,0 +1,176 @@
+---
+title: "Safe Harbor Protection"
+description: "Understanding the legal protections provided by Safe Harbor agreements"
+---
+
+The Safe Harbor agreement is the legal foundation that allows whitehats to attack contracts on BattleChain without fear of prosecution. Understanding its protections and limitations is essential.
+
+## What Safe Harbor Provides
+
+When a protocol adopts a Safe Harbor agreement and their contracts enter `UNDER_ATTACK` state, they are making a legal commitment:
+
+<CardGroup cols={2}>
+  <Card title="You Can" icon="check">
+    - Exploit vulnerabilities in in-scope contracts
+    - Extract funds from vulnerable contracts
+    - Keep your bounty percentage (up to the cap)
+    - Act without prior coordination with the protocol
+    - Remain anonymous (if allowed by terms)
+  </Card>
+  <Card title="Protocol Commits To" icon="handshake">
+    - Not pursue legal action against compliant whitehats
+    - Honor the bounty terms in the agreement
+    - Provide accurate scope information
+    - Maintain the agreement during the commitment period
+  </Card>
+</CardGroup>
+
+## Requirements for Protection
+
+To be protected by Safe Harbor, you must:
+
+### 1. Attack Only In-Scope Contracts
+
+```solidity
+// Verify contract is in scope
+bool inScope = agreement.isContractInScope(targetContract);
+require(inScope, "Not protected if out of scope");
+
+// Check the agreement state
+IAttackRegistry.ContractState state = attackRegistry.getAgreementState(agreementAddress);
+require(
+    state == ContractState.UNDER_ATTACK || state == ContractState.PROMOTION_REQUESTED,
+    "Contract must be in attack mode"
+);
+```
+
+### 2. Handle Funds Correctly
+
+- Send recovered funds to the specified recovery address
+- Keep only your entitled bounty (percentage up to cap)
+- Don't "accidentally" forget to return funds
+
+### 3. Meet Identity Requirements
+
+If the agreement requires identity verification:
+
+| Requirement | What You Must Do |
+|-------------|------------------|
+| `Anonymous` | Nothing required |
+| `Pseudonymous` | Provide a consistent pseudonym to the protocol |
+| `Named` | Confirm your legal name through the specified process |
+
+### 4. Comply with Diligence Requirements
+
+For `Named` identity, check `diligenceRequirements` for additional steps:
+
+```solidity
+string memory requirements = terms.diligenceRequirements;
+// May specify KYC provider, documentation needed, etc.
+```
+
+## What's Not Protected
+
+Safe Harbor does NOT protect:
+
+<Warning>
+- **Attacking production contracts**: Contracts in `PRODUCTION` state have no Safe Harbor protection
+- **Exceeding scope**: Attacking contracts not listed in the agreement
+- **Keeping excess funds**: Taking more than your bounty entitlement
+- **Ignoring identity requirements**: Not complying with KYC when required
+- **Malicious behavior**: Using exploits to harm users beyond the attack
+</Warning>
+
+## Verifying Safe Harbor Coverage
+
+Before attacking, always verify:
+
+```solidity
+// 1. Agreement is valid (created by official factory)
+bool validAgreement = safeHarborRegistry.isAgreementValid(agreementAddress);
+
+// 2. Contract is in attack mode
+bool attackable = attackRegistry.isTopLevelContractUnderAttack(targetContract);
+
+// 3. Contract is in agreement scope
+bool inScope = agreement.isContractInScope(targetContract);
+
+// 4. Agreement hasn't been modified unfavorably
+// (check commitment window hasn't been violated)
+uint256 cantChangeUntil = agreement.getCantChangeUntil();
+// Terms cannot be made worse during this period
+```
+
+## Commitment Window
+
+Protocols commit to not making unfavorable changes during the commitment window:
+
+```solidity
+uint256 cantChangeUntil = agreement.getCantChangeUntil();
+
+// During this window, the protocol CANNOT:
+// - Reduce bounty percentage or caps
+// - Remove contracts from scope
+// - Make identity requirements stricter
+// - Change from retainable to return-all
+// - Modify the agreement URI
+```
+
+This protects you from "bait and switch" tactics where terms change after you've done work.
+
+## The Agreement Document
+
+Every agreement includes a URI to the full legal document:
+
+```solidity
+string memory agreementURI = agreement.getAgreementURI();
+// e.g., "ipfs://QmXXXXXX" or "ar://XXXXXX"
+```
+
+This document contains the complete legal terms. The on-chain data is a summary, but the URI document is the authoritative source.
+
+## Pre-Notification
+
+While not required, consider pre-notifying the protocol:
+
+```solidity
+// Get contact details
+Contact[] memory contacts = agreement.getContactDetails();
+
+// contacts may include:
+// - Security email
+// - Telegram handle
+// - Discord channel
+// - On-call phone number
+```
+
+Pre-notification can help:
+- Avoid duplicate work if they already know
+- Get clarification on scope edge cases
+- Build goodwill for future bounties
+
+## If Something Goes Wrong
+
+### Protocol Claims You Violated Terms
+
+1. **Document your compliance**: Transaction hashes, calculations, timestamps
+2. **Show you met all requirements**: In-scope, correct fund handling, identity compliance
+3. **Involve neutral parties**: DAO, legal counsel if needed
+
+### Protocol Changed Terms Unfavorably
+
+1. **Check commitment window**: Were changes made during the protected period?
+2. **Archive evidence**: On-chain state at time of your attack
+3. **Escalate to DAO**: They can arbitrate agreement violations
+
+### Scope Ambiguity
+
+If there's confusion about whether a contract is in scope:
+
+1. **Check child contract settings**: Does the parent include children?
+2. **Contact protocol**: Ask for clarification before attacking
+3. **When in doubt, don't attack**: Better safe than sorry
+
+<Card title="Next: Identity Requirements" icon="arrow-right" href="/whitehats/identity">
+  Learn about identity verification options
+</Card>

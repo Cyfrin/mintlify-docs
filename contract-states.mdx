@@ -1,0 +1,165 @@
+---
+title: "Contract States"
+description: "Understanding the BattleChain contract state machine"
+---
+
+Every agreement registered with BattleChain goes through a defined state machine. Understanding these states is crucial for protocols, whitehats, and the DAO.
+
+## State Diagram
+
+```
+                              ┌─────────────────┐
+                              │  NOT_DEPLOYED   │
+                              └────────┬────────┘
+                                       │ Deploy via BattleChainDeployer
+                                       ▼
+                              ┌─────────────────┐
+                              │ NEW_DEPLOYMENT  │
+                              └────────┬────────┘
+                                       │ requestUnderAttack()
+                                       ▼
+                              ┌─────────────────┐
+                              │ATTACK_REQUESTED │
+                              └────────┬────────┘
+                                       │
+                    ┌──────────────────┼──────────────────┐
+                    │                  │                  │
+                    ▼                  ▼                  ▼
+           ┌───────────────┐  ┌───────────────┐  ┌───────────────┐
+           │   REJECTED    │  │  UNDER_ATTACK │  │   PRODUCTION  │
+           │ (back to NOT_ │  └───────┬───────┘  │ (instantPromote)
+           │   DEPLOYED)   │          │          └───────────────┘
+           └───────────────┘          │
+                                      │ promote()
+                                      ▼
+                              ┌─────────────────┐
+                              │   PROMOTION_    │
+                              │   REQUESTED     │
+                              └────────┬────────┘
+                                       │
+                    ┌──────────────────┼──────────────────┐
+                    │                  │                  │
+                    ▼                  ▼                  ▼
+           ┌───────────────┐  ┌───────────────┐  ┌───────────────┐
+           │  UNDER_ATTACK │  │   PRODUCTION  │  │   CORRUPTED   │
+           │(cancelPromotion)│ │ (after 3 days)│  │ (markCorrupted)
+           └───────────────┘  └───────────────┘  └───────────────┘
+```
+
+## State Definitions
+
+<AccordionGroup>
+  <Accordion title="NOT_DEPLOYED">
+    The default state for contracts not registered with BattleChain, or contracts whose attack request was rejected.
+
+    **Who can attack:** No one (no Safe Harbor protection)
+
+    **Transitions:**
+    - → `NEW_DEPLOYMENT`: When deployed via `BattleChainDeployer`
+  </Accordion>
+
+  <Accordion title="NEW_DEPLOYMENT">
+    Contracts deployed via `BattleChainDeployer` start here. The deployer is automatically authorized to request attack mode.
+
+    **Who can attack:** No one (not yet in attack mode)
+
+    **Transitions:**
+    - → `ATTACK_REQUESTED`: When the agreement owner calls `requestUnderAttack()`
+    - → `PRODUCTION`: When the agreement owner calls `goToProduction()` (skips attack phase)
+  </Accordion>
+
+  <Accordion title="ATTACK_REQUESTED">
+    The protocol has requested attack mode and is waiting for DAO approval.
+
+    **Who can attack:** No one (waiting for approval)
+
+    **Transitions:**
+    - → `UNDER_ATTACK`: DAO calls `approveAttack()`
+    - → `NOT_DEPLOYED`: DAO calls `rejectAttackRequest()`
+    - → `PRODUCTION`: DAO calls `instantPromote()` (emergency)
+    - → `PRODUCTION`: Auto-promote after 14 days if DAO doesn't act
+  </Accordion>
+
+  <Accordion title="UNDER_ATTACK">
+    **Open season for whitehats.** Contracts in this state can be legally attacked under Safe Harbor protection.
+
+    **Who can attack:** Any whitehat following the agreement terms
+
+    **Transitions:**
+    - → `PROMOTION_REQUESTED`: Attack moderator calls `promote()`
+    - → `CORRUPTED`: Attack moderator calls `markCorrupted()` after a successful exploit
+    - → `PRODUCTION`: DAO calls `instantPromote()` (emergency)
+  </Accordion>
+
+  <Accordion title="PROMOTION_REQUESTED">
+    The protocol has requested promotion to production. A 3-day delay allows whitehats a final chance to find issues.
+
+    **Who can attack:** Whitehats can still attack during the delay
+
+    **Transitions:**
+    - → `PRODUCTION`: After 3 days automatically
+    - → `UNDER_ATTACK`: Attack moderator calls `cancelPromotion()`
+    - → `CORRUPTED`: Attack moderator calls `markCorrupted()`
+    - → `PRODUCTION`: DAO calls `instantPromote()` (immediate)
+  </Accordion>
+
+  <Accordion title="PRODUCTION">
+    **Terminal state.** Contracts are protected like mainnet. No Safe Harbor protection for attacks.
+
+    **Who can attack:** No one (standard bug bounty rules apply)
+
+    **Transitions:** None (terminal state)
+  </Accordion>
+
+  <Accordion title="CORRUPTED">
+    **Terminal state.** A successful attack was executed. The protocol should investigate and redeploy.
+
+    **Who can attack:** N/A (contract is compromised)
+
+    **Transitions:** None (terminal state)
+  </Accordion>
+</AccordionGroup>
+
+## Key Constants
+
+| Constant | Value | Description |
+|----------|-------|-------------|
+| `PROMOTION_WINDOW` | 14 days | Auto-promote if DAO doesn't act on attack request |
+| `PROMOTION_DELAY` | 3 days | Delay after `promote()` before entering production |
+| `MIN_COMMITMENT` | 7 days | Minimum commitment window for agreements |
+
+## Checking Contract State
+
+<CodeGroup>
+```solidity Check if attackable
+// Check if a specific contract is currently attackable
+bool attackable = attackRegistry.isTopLevelContractUnderAttack(contractAddress);
+```
+
+```solidity Get detailed state
+// Get the agreement's current state
+IAttackRegistry.ContractState state = attackRegistry.getAgreementState(agreementAddress);
+
+// State enum values:
+// 0 = NOT_DEPLOYED
+// 1 = NEW_DEPLOYMENT
+// 2 = ATTACK_REQUESTED
+// 3 = UNDER_ATTACK
+// 4 = PROMOTION_REQUESTED
+// 5 = PRODUCTION
+// 6 = CORRUPTED
+```
+
+```solidity Get full agreement info
+// Get complete agreement information
+IAttackRegistry.AgreementInfo memory info = attackRegistry.getAgreementInfo(agreementAddress);
+
+// info.attackModerator - who can manage this agreement
+// info.deadlineTimestamp - when auto-promotion occurs
+// info.promotionRequestedTimestamp - when promote() was called
+// info.attackRequested - has attack been requested?
+// info.attackApproved - has DAO approved?
+// info.promoted - is it in production?
+// info.corrupted - was it successfully attacked?
+```
+</CodeGroup>
