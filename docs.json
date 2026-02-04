@@ -14,72 +14,82 @@
   "navigation": {
     "tabs": [
       {
-        "tab": "Getting Started",
+        "tab": "Home",
         "groups": [
           {
-            "group": "Introduction",
+            "group": "Welcome",
             "pages": [
-              "index",
-              "what-is-battlechain",
-              "contract-states"
+              "index"
             ]
           }
         ]
       },
       {
-        "tab": "For Protocols",
+        "tab": "Quickstart",
         "groups": [
           {
-            "group": "Protocol Guide",
+            "group": "Quickstart Guides",
             "pages": [
-              "protocols/overview",
-              "protocols/deploying",
-              "protocols/agreements",
-              "protocols/attack-mode",
-              "protocols/promotion",
-              "protocols/best-practices"
+              "quickstart/deploy-first-contract",
+              "quickstart/execute-first-attack",
+              "quickstart/review-first-request"
             ]
           }
         ]
       },
       {
-        "tab": "For Whitehats",
+        "tab": "How-to Guides",
         "groups": [
           {
-            "group": "Whitehat Guide",
+            "group": "For Protocols",
             "pages": [
-              "whitehats/overview",
-              "whitehats/finding-targets",
-              "whitehats/executing-attacks",
-              "whitehats/bounties",
-              "whitehats/safe-harbor",
-              "whitehats/identity"
+              "how-to/create-agreement",
+              "how-to/request-attack-mode",
+              "how-to/promote-to-production"
+            ]
+          },
+          {
+            "group": "For Whitehats",
+            "pages": [
+              "how-to/find-attackable-contracts",
+              "how-to/execute-attack",
+              "how-to/claim-bounties"
+            ]
+          },
+          {
+            "group": "For the DAO",
+            "pages": [
+              "how-to/approve-reject-requests",
+              "how-to/instant-promotion"
             ]
           }
         ]
       },
       {
-        "tab": "For the DAO",
+        "tab": "Explanation",
         "groups": [
           {
-            "group": "DAO Guide",
+            "group": "Understanding BattleChain",
             "pages": [
-              "dao/overview",
-              "dao/reviewing-requests",
-              "dao/approval-process",
-              "dao/instant-promotion",
-              "dao/parameters"
+              "explanation/what-is-battlechain",
+              "explanation/contract-lifecycle",
+              "explanation/safe-harbor",
+              "explanation/best-practices"
             ]
           }
         ]
       },
       {
-        "tab": "API Reference",
+        "tab": "Reference",
         "groups": [
           {
-            "group": "Contracts",
+            "group": "Technical Reference",
             "pages": [
-              "contracts/reference"
+              "reference/contracts",
+              "reference/contract-states",
+              "reference/bounty-terms",
+              "reference/identity-requirements",
+              "reference/governance-parameters"
             ]
           }
         ]
@@ -89,7 +99,7 @@
       "anchors": [
         {
           "anchor": "GitHub",
-          "href": "https://github.com/battlechain",
+          "href": "https://github.com/cyfrin/battlechain-safe-harbor",
           "icon": "github"
         }
       ]
@@ -99,34 +109,12 @@
     "light": "/logo/light.svg",
     "dark": "/logo/dark.svg"
   },
-  "navbar": {
-    "links": [
-      {
-        "label": "Support",
-        "href": "mailto:support@battlechain.com"
-      }
-    ],
-    "primary": {
-      "type": "button",
-      "label": "Launch App",
-      "href": "https://app.battlechain.com"
-    }
-  },
+  "navbar": {},
   "footer": {
     "socials": {
       "x": "https://x.com/battlechain",
-      "github": "https://github.com/battlechain",
+      "github": "https://github.com/cyfrin/battlechain-safe-harbor",
       "discord": "https://discord.gg/battlechain"
-    }
-  },
-  "font": {
-    "headings": {
-      "family": "Inter",
-      "weight": 600
-    },
-    "body": {
-      "family": "Inter",
-      "weight": 400
     }
   }
 }

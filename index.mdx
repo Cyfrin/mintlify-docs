@@ -5,30 +5,17 @@ description: "The pre-mainnet stress testing environment for smart contracts"
 
 BattleChain is an incentivized pre-mainnet environment where protocols can stress test their smart contracts with real funds before deploying to production.
 
-## The Problem
-
-- There's no real staging environment in Web3
-- Projects go from $0 to $5M TVL overnight after audit
-- Bug bounties are difficult for ethical hackers
-- The industry keeps losing billions to preventable exploits
-
-## The Solution
-
-BattleChain provides a controlled environment where:
-
-- **Protocols** deploy audited contracts with real liquidity for stress testing
-- **Whitehats** legally attack contracts marked as "attackable" and earn bounties
-- **The DAO** moderates the process, approving attack requests and preventing copycat exploits
+## Get Started
 
 <CardGroup cols={3}>
-  <Card title="For Protocols" icon="building" href="/protocols/overview">
-    Deploy and stress test your contracts before mainnet
+  <Card title="Deploy Your First Contract" icon="rocket" href="/quickstart/deploy-first-contract">
+    Protocol? Start here.
   </Card>
-  <Card title="For Whitehats" icon="user-secret" href="/whitehats/overview">
-    Find vulnerabilities and earn bounties legally
+  <Card title="Execute Your First Attack" icon="crosshairs" href="/quickstart/execute-first-attack">
+    Whitehat? Start here.
   </Card>
-  <Card title="For the DAO" icon="landmark" href="/dao/overview">
-    Moderate the attack registry and protect the ecosystem
+  <Card title="Review Your First Request" icon="clipboard-check" href="/quickstart/review-first-request">
+    DAO member? Start here.
   </Card>
 </CardGroup>
 
@@ -45,6 +32,19 @@ Deploy → Request Attack Mode → DAO Approves → Stress Test → Promote to P
 5. Whitehats attack the contracts legally
 6. Protocol promotes to production when confident
 
-<Card title="Understand Contract States" icon="diagram-project" href="/contract-states">
-  Learn about the contract state machine that powers BattleChain
-</Card>
+## Learn More
+
+<CardGroup cols={2}>
+  <Card title="What is BattleChain?" icon="circle-question" href="/explanation/what-is-battlechain">
+    Understand the problem BattleChain solves
+  </Card>
+  <Card title="Contract Lifecycle" icon="diagram-project" href="/explanation/contract-lifecycle">
+    Learn about contract states and transitions
+  </Card>
+  <Card title="Safe Harbor Protection" icon="shield" href="/explanation/safe-harbor">
+    Understand legal protections for whitehats
+  </Card>
+  <Card title="Best Practices" icon="star" href="/explanation/best-practices">
+    Guidelines for protocols, whitehats, and the DAO
+  </Card>
+</CardGroup>
