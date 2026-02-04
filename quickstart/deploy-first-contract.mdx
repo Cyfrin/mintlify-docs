@@ -16,9 +16,9 @@ This tutorial walks you through deploying a contract to BattleChain and getting 
 3. Request attack mode
 4. Wait for DAO approval
 
-## Step 1: Deploy via BattleChainDeployer
+## Step 1: Deploy Your Contract
 
-All contracts that want attack mode must be deployed through `BattleChainDeployer`. This registers them with the `AttackRegistry`.
+The recommended way to deploy is through `BattleChainDeployer`, which automatically registers your contract with the `AttackRegistry`.
 
 ```solidity
 // Get the BattleChainDeployer instance
@@ -35,6 +35,15 @@ address myVault = deployer.deployCreate2(salt, bytecode);
 <Check>
 Your contract is now deployed and registered. You (the deployer) are automatically authorized to request attack mode.
 </Check>
+
+<Accordion title="Already deployed without BattleChainDeployer?">
+If your contract was deployed through other means, you can still request attack mode using `requestUnderAttackByNonAuthorized`. This function allows any contract to enter the attack flow, but requires DAO approval like normal.
+
+In Step 5, use this instead:
+```solidity
+attackRegistry.requestUnderAttackByNonAuthorized(agreement);
+```
+</Accordion>
 
 ## Step 2: Create a Safe Harbor Agreement
 
